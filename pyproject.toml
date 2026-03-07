@@ -141,4 +141,4 @@ package = true
 opdx-read = { git = "https://github.com/opruvd/OPDx_read.git" }
 
 [project.scripts]
-script = "profilometryheights.script:main"
+script = "Auto_OPDx.script:main"
