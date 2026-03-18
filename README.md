@@ -20,7 +20,7 @@
 ### Installing with pip
 1.  **Clone the repository and navigate into it:**
     ```
-    git clone [https://github.com/cjeong1021/Auto_OPDx.git](https://github.com/cjeong1021/Auto_OPDx.git)
+    git clone https://github.com/cjeong1021/Auto_OPDx.git
 
     cd Auto_OPDx
     ```
@@ -39,7 +39,7 @@
 
 1.  **Clone the repository and navigate into it:**
     ```
-    git clone [https://github.com/cjeong1021/Auto_OPDx.git](https://github.com/cjeong1021/Auto_OPDx.git)
+    git clone https://github.com/cjeong1021/Auto_OPDx.git
 
     cd Auto_OPDx
     ```
