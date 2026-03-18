@@ -17,35 +17,51 @@
 * It is highly recommended to use [uv](https://github.com/astral-sh/uv) for the fastest and most reliable dependency management.
 * Or you can use pip.
 
-### Using `uv`
+### Installing with pip
+1.  **Clone the repository and navigate into it:**
+    ```
+    git clone [https://github.com/cjeong1021/Auto_OPDx.git](https://github.com/cjeong1021/Auto_OPDx.git)
+
+    cd Auto_OPDx
+    ```
+2.  **Create and activate a virtual environment:**
+    ```
+    python -m venv .venv
+    source .venv/bin/activate
+    ```
+3.  **Install:**
+    ```
+    pip install -e .
+    ```
+
+### Installing with `uv`
 [uv](https://github.com/astral-sh/uv) handles virtual environments and dependencies automatically based on the `pyproject.toml` file. 
 
-1.  **Clone the repository:**
-    ```bash
+1.  **Clone the repository and navigate into it:**
+    ```
     git clone [https://github.com/cjeong1021/Auto_OPDx.git](https://github.com/cjeong1021/Auto_OPDx.git)
+
     cd Auto_OPDx
     ```
 2.  **Sync dependencies:**
     This command creates a virtual environment and installs all necessary packages in one step.
-    ```bash
-    uv sync
-
     ```
----
+    uv sync
+    ```
 
 ## Usage
 
 ### Running the GUI
-**Using uv:**
-Run the application script directly without needing to manually activate the environment:
-```bash
-    uv run script
+Run the application in your virtual environment:
+```
+auto-opdx
 ```
 
-### Running the GUI
+### Running Jupyter Notebook
+An interactive Jupyter Notebook is also provided for better visualization. You can run the Jupyter Notebook in the virtual environment:
 
-1.  Launch Server
+1.  Launching Server
 ```bash
-    uv run jupyter lab 
+jupyter lab 
 ```
-2.  This will open a web browser where you can open `profilometryheights_notebook.ipynb`.
+This will open a web browser where you can open `profilometryheights_notebook.ipynb`. Ensure all OPDx files are in the same directory and complete the initial prompt asking for the file name and grid rows/cols.
