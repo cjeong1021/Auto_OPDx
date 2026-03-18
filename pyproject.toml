@@ -1,10 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
-name = "profilometryheights"
+name = "Auto_OPDx"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Python program for analyzing profilometry data"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "OPDx_read @ git+https://github.com/opruvd/OPDx_read",
     "ansicolors==1.1.8",
     "anyio==4.12.1",
     "appnope==0.1.4",
@@ -134,11 +139,20 @@ dependencies = [
     "widgetsnbextension==4.0.15",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff"
+]
+
 [tool.uv]
 package = true
 
 [tool.uv.sources]
 opdx-read = { git = "https://github.com/opruvd/OPDx_read.git" }
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [project.scripts]
-script = "Auto_OPDx.script:main"
+auto-opdx = "Auto_OPDx.main:main"
