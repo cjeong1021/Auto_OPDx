@@ -10,17 +10,18 @@ def reorder_components(num_labels, stats, centroids, rows, cols):
 
     print(f"Total components detected for mapping: {len(comp_centroids_raw)}")
 
-    # 2. Define 8x8 Grid centers based on the bounds of these detections
-    unique_x = np.linspace(comp_centroids_raw[:, 0].min(), comp_centroids_raw[:, 0].max(), 8)
-    unique_y = np.linspace(comp_centroids_raw[:, 1].min(), comp_centroids_raw[:, 1].max(), 8)
+    # 2. Define grid centers based on the bounds of these detections
+    unique_x = np.linspace(comp_centroids_raw[:, 0].min(), comp_centroids_raw[:, 0].max(), cols)
+    unique_y = np.linspace(comp_centroids_raw[:, 1].min(), comp_centroids_raw[:, 1].max(), rows)
 
     # 3. Create theoretical slots in quadrant order (BL, TL, BR, TR)
-    # Quadrant ranges: 0-3 and 4-7
+    half_cols = cols // 2
+    half_rows = rows // 2
     quadrant_ranges = [
-        ((0, 4), (0, 4)), # Bottom-Left
-        ((0, 4), (4, 8)), # Top-Left
-        ((4, 8), (0, 4)), # Bottom-Right
-        ((4, 8), (4, 8))  # Top-Right
+        ((0, half_cols), (0, half_rows)), # Bottom-Left
+        ((0, half_cols), (half_rows, rows)), # Top-Left
+        ((half_cols, cols), (0, half_rows)), # Bottom-Right
+        ((half_cols, cols), (half_rows, rows))  # Top-Right
     ]
 
     theoretical_slots = []
@@ -41,9 +42,10 @@ def reorder_components(num_labels, stats, centroids, rows, cols):
 
     slot_to_det_map = {slot_idx + 1: det_idx for det_idx, slot_idx in zip(det_indices, slot_indices)}
 
-    # 5. Build final 65-element arrays
-    final_centroids = np.zeros((65, 2))
-    final_stats = np.zeros((65, 5), dtype=int)
+    # 5. Build final element arrays
+    total_slots = rows * cols
+    final_centroids = np.zeros((total_slots + 1, 2))
+    final_stats = np.zeros((total_slots + 1, 5), dtype=int)
     final_centroids[0] = centroids[0]
     final_stats[0] = stats[0]
 
