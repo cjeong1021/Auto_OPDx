@@ -23,7 +23,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-glx libqt5x11extras5 ccache patchelf
+          sudo apt-get install -y libgl1 libqt5x11extras5 ccache patchelf
 
       - name: Install System Dependencies (macOS)
         if: runner.os == 'macOS'
