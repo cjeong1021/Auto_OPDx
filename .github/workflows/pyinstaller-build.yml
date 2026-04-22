@@ -45,6 +45,76 @@ jobs:
         run: |
           uv run --no-sync pyinstaller --name ProfilometryApp --onefile --windowed entry.py
 
+      - name: Code Signing (Windows)
+        if: runner.os == 'Windows'
+        env:
+          WINDOWS_CERT_BASE64: ${{ secrets.WINDOWS_CERT_BASE64 }}
+          WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+        shell: pwsh
+        run: |
+          if ($env:WINDOWS_CERT_BASE64) {
+            Write-Host "Signing Windows executable..."
+            $Bytes = [Convert]::FromBase64String($env:WINDOWS_CERT_BASE64)
+            [IO.File]::WriteAllBytes("cert.pfx", $Bytes)
+            
+            $Signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Filter "signtool.exe" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1).FullName
+            if (-not $Signtool) { $Signtool = "signtool" }
+            
+            & $Signtool sign /f cert.pfx /p $env:WINDOWS_CERT_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 dist\ProfilometryApp.exe
+            Remove-Item cert.pfx
+          } else {
+            Write-Host "Skipping Windows code signing (secrets not configured)."
+          }
+
+      - name: Code Signing (macOS)
+        if: runner.os == 'macOS'
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
+          MACOS_KEYCHAIN_PWD: ${{ secrets.MACOS_KEYCHAIN_PWD }}
+        shell: bash
+        run: |
+          if [ -n "$MACOS_CERTIFICATE" ]; then
+            echo "Signing macOS app..."
+            CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+            KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+            echo "$MACOS_CERTIFICATE" | base64 --decode -o $CERTIFICATE_PATH
+
+            security create-keychain -p "$MACOS_KEYCHAIN_PWD" $KEYCHAIN_PATH
+            security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+            security unlock-keychain -p "$MACOS_KEYCHAIN_PWD" $KEYCHAIN_PATH
+
+            security import $CERTIFICATE_PATH -P "$MACOS_CERTIFICATE_PWD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+            security list-keychain -d user -s $KEYCHAIN_PATH
+            security set-key-partition-list -S apple-tool:,apple: -s -k "$MACOS_KEYCHAIN_PWD" $KEYCHAIN_PATH
+
+            if [ -d "dist/ProfilometryApp.app" ]; then
+              codesign --force --deep --options runtime --sign "$MACOS_CERTIFICATE_NAME" dist/ProfilometryApp.app
+            fi
+            if [ -f "dist/ProfilometryApp" ]; then
+              codesign --force --options runtime --sign "$MACOS_CERTIFICATE_NAME" dist/ProfilometryApp
+            fi
+          else
+            echo "Skipping macOS code signing (secrets not configured)."
+          fi
+
+      - name: Code Signing (Linux)
+        if: runner.os == 'Linux'
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        shell: bash
+        run: |
+          if [ -n "$GPG_PRIVATE_KEY" ]; then
+            echo "Signing Linux executable with GPG..."
+            echo "$GPG_PRIVATE_KEY" | gpg --import
+            gpg --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" --detach-sign --armor dist/ProfilometryApp
+          else
+            echo "Skipping Linux code signing (secrets not configured)."
+          fi
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
