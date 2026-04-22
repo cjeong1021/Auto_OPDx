@@ -1,0 +1,58 @@
+name: Build Executables with Nuitka
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install System Dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-glx libqt5x11extras5 ccache patchelf
+
+      - name: Install System Dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install ccache
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: |
+          uv sync --all-extras --dev
+          uv pip install nuitka
+
+      - name: Build with Nuitka
+        run: |
+          uv run python -m nuitka --standalone --onefile --enable-plugin=pyqt5 --enable-plugin=numpy --enable-plugin=matplotlib --output-filename=ProfilometryApp entry.py
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProfilometryApp-${{ matrix.os }}
+          path: |
+            ProfilometryApp.exe
+            ProfilometryApp.bin
+            ProfilometryApp
+          if-no-files-found: warn
