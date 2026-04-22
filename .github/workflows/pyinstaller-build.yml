@@ -1,4 +1,4 @@
-name: Build Executables with Nuitka
+name: Build Executables with PyInstaller
 
 on:
   push:
@@ -23,12 +23,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1 libqt5x11extras5 ccache patchelf
-
-      - name: Install System Dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install ccache
+          sudo apt-get install -y libgl1 libqt5x11extras5
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -44,18 +39,15 @@ jobs:
           rm -f uv.lock
           uv venv
           uv pip install -e .
-          uv pip install nuitka
+          uv pip install pyinstaller
 
-      - name: Build with Nuitka
+      - name: Build with PyInstaller
         run: |
-          uv run --no-sync python -m nuitka --standalone --onefile --enable-plugin=pyqt5 --enable-plugin=numpy --enable-plugin=matplotlib --output-filename=ProfilometryApp entry.py
+          uv run --no-sync pyinstaller --name ProfilometryApp --onefile --windowed entry.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ProfilometryApp-${{ matrix.os }}
-          path: |
-            ProfilometryApp.exe
-            ProfilometryApp.bin
-            ProfilometryApp
+          path: dist/*
           if-no-files-found: warn
