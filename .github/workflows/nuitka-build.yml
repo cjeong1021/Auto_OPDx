@@ -39,13 +39,16 @@ jobs:
         run: uv python install 3.12
 
       - name: Install dependencies
+        shell: bash
         run: |
-          uv sync --all-extras --dev
+          rm -f uv.lock
+          uv venv
+          uv pip install -e .
           uv pip install nuitka
 
       - name: Build with Nuitka
         run: |
-          uv run python -m nuitka --standalone --onefile --enable-plugin=pyqt5 --enable-plugin=numpy --enable-plugin=matplotlib --output-filename=ProfilometryApp entry.py
+          uv run --no-sync python -m nuitka --standalone --onefile --enable-plugin=pyqt5 --enable-plugin=numpy --enable-plugin=matplotlib --output-filename=ProfilometryApp entry.py
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4

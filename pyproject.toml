@@ -7,7 +7,7 @@ name = "Auto_OPDx"
 version = "0.1.0"
 description = "A Python program for analyzing profilometry data"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.10"
 dependencies = [
     "OPDx_read @ git+https://github.com/opruvd/OPDx_read",
     "ansicolors==1.1.8",
